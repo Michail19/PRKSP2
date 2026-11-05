@@ -1,0 +1,13 @@
+ru\mirea\practice4\common\ApiModels$Darkstore.class
+ru\mirea\practice4\common\ApiModels.class
+ru\mirea\practice4\common\ApiModels$ClientEvent.class
+ru\mirea\practice4\common\ApiModels$DeliverySummary.class
+ru\mirea\practice4\common\ApiModels$Delivery.class
+ru\mirea\practice4\common\ApiModels$QuoteRequest.class
+ru\mirea\practice4\common\ApiModels$GoodRequest.class
+ru\mirea\practice4\common\ApiModels$Good.class
+ru\mirea\practice4\common\ApiModels$GoodsStreamRequest.class
+ru\mirea\practice4\common\ApiModels$QuoteReply.class
+ru\mirea\practice4\common\ApiModels$GoodsListItem.class
+ru\mirea\practice4\common\CsvParser.class
+ru\mirea\practice4\common\ApiModels$DeliveryRequest.class
