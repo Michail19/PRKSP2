@@ -1,0 +1,54 @@
+=== Практическая №2: Java NIO и обмен данными АС Поставщиков ===
+Каталог data/incoming: уже существует
+Каталог data/processed: уже существует
+
+Содержимое /tmp/tmpwazvrjni/data/incoming:
+  darkstore.csv          |    232 байт | изменён: 21.10.2026 16:20:09
+  good.csv               |    449 байт | изменён: 21.10.2026 16:20:09
+  goods_list.csv         |    255 байт | изменён: 21.10.2026 16:20:09
+  delivery.csv           |    728 байт | изменён: 21.10.2026 16:20:09
+
+Найдено входных CSV: 4
+
+--- Обработка файла darkstore.csv ---
+NIO: чтение через FileChannel + ByteBuffer
+File: darkstore.csv
+Entity: darkstore
+Size: 232 bytes
+SHA-256: AE9B0ABA01D6481186400AA4C0D5016A51E3AB39EB5D28676D9AD9E22C66C716
+Records: 5
+Result: обнаружено дарксторов: 5
+Status: processed
+Перемещён в: data/processed/darkstore.csv
+
+--- Обработка файла delivery.csv ---
+File: delivery.csv
+Entity: delivery
+Size: 728 bytes
+SHA-256: 9DDC4242F021E3F864086DC5256F56A2BA5F7005AC1AE990BB4D6651D33C0FD5
+Records: 20
+Result: доставок: 20, статусы: {COMPLETED=12, CANCELLED=3, DELIVERY=2, ASSEMBLY=2, SUBMITTED=1}
+Status: processed
+Перемещён в: data/processed/delivery.csv
+
+--- Обработка файла good.csv ---
+File: good.csv
+Entity: good
+Size: 449 bytes
+SHA-256: B75C85044B02A6F71312311B8F659FB7D493A0A63411B2231B15D3F61BF4DF0B
+Records: 10
+Result: товаров: 10, сумма цен: 3199.90
+Status: processed
+Перемещён в: data/processed/good.csv
+
+--- Обработка файла goods_list.csv ---
+File: goods_list.csv
+Entity: goods_list
+Size: 255 bytes
+SHA-256: D4B14B10BF8F90C97E32484069F2B44BB6E4EAC73A1BD9E5D612352BED763D2F
+Records: 30
+Result: позиций: 30, всего единиц: 1625
+Status: processed
+Перемещён в: data/processed/goods_list.csv
+
+Режим --once: начальная обработка завершена.

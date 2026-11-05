@@ -1,0 +1,3 @@
+CSV loader OK: darkstore=5; good=10; delivery=20; goods_list=30
+Good#1: Пицца "Маргарита"
+Darkstore#1: улица Солнечная, дом 10

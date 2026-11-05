@@ -1,0 +1,15 @@
+Проверка 2026-11-05: independent JDK 21 verification, no Spring dependencies.
+Command:
+  javac --release 17 -encoding UTF-8 -d /tmp/pr4_classes \
+    common/src/main/java/ru/mirea/practice4/common/ApiModels.java \
+    common/src/main/java/ru/mirea/practice4/common/CsvParser.java \
+    server/src/main/java/ru/mirea/practice4/server/CsvCatalog.java \
+    server/src/test/java/ru/mirea/practice4/server/CatalogSmokeCheck.java
+
+  java -cp /tmp/pr4_classes:server/src/main/resources ru.mirea.practice4.server.CatalogSmokeCheck
+
+Output:
+  CSV smoke check OK: 5 darkstores, 10 goods, 20 deliveries, 30 positions
+  delivery 1 = 40399.28
+
+Maven/Spring/RSocket integration execution was unavailable; do not represent this as a real network test.
