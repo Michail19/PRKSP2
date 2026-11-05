@@ -4,45 +4,7 @@ pragma solidity ^0.8.20;
 // Remix IDE: Solidity Unit Testing plugin предоставляет Assert.
 import "remix_tests.sol";
 import "../contracts/DeliveryLifecycle.sol";
-
-/**
- * Тестовый контракт-актор позволяет отправлять вызовы с разных msg.sender:
- * customer, courier и stranger — разные адреса контрактов в тестовой EVM.
- */
-contract DeliveryActor {
-    function create(
-        DeliveryLifecycle target,
-        uint256 orderId,
-        uint256 darkstoreId,
-        uint256 priceKopecks
-    ) external returns (uint256) {
-        return target.createDelivery(orderId, darkstoreId, priceKopecks);
-    }
-
-    function assign(
-        DeliveryLifecycle target,
-        uint256 deliveryId,
-        address courier
-    ) external {
-        target.assignCourier(deliveryId, courier);
-    }
-
-    function accept(DeliveryLifecycle target, uint256 deliveryId) external {
-        target.acceptDelivery(deliveryId);
-    }
-
-    function start(DeliveryLifecycle target, uint256 deliveryId) external {
-        target.startDelivery(deliveryId);
-    }
-
-    function complete(DeliveryLifecycle target, uint256 deliveryId) external {
-        target.completeDelivery(deliveryId);
-    }
-
-    function cancel(DeliveryLifecycle target, uint256 deliveryId) external {
-        target.cancelDelivery(deliveryId);
-    }
-}
+import "../contracts/DeliveryActor.sol";
 
 contract DeliveryLifecycleTest {
     DeliveryLifecycle private target;
