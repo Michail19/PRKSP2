@@ -25,11 +25,9 @@ Practice4_DarkstoreRSocket/
 │   ├── src/main/resources/application.properties
 │   ├── src/main/resources/data/*.csv
 │   └── src/test/java/.../CatalogSmokeCheck.java
-├── client/
-│   ├── src/main/java/.../RSocketClientApplication.java
-│   └── src/main/resources/application.properties
-└── evidence/
-    └── data_smoke_check.txt
+└── client/
+    ├── src/main/java/.../RSocketClientApplication.java
+    └── src/main/resources/application.properties
 ```
 
 ## Запуск в IntelliJ IDEA — самый простой
