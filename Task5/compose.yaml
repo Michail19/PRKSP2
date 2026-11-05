@@ -1,0 +1,114 @@
+name: practice5-darkstore
+
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 15
+      start_period: 10s
+
+  order-service:
+    build:
+      context: ./order-service
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      SERVER_PORT: "8080"
+      DB_URL: jdbc:postgresql://db:5432/${POSTGRES_DB}
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - backend
+      - edge
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8080/actuator/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 35s
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=practice5-edge"
+      - "traefik.http.routers.orders.rule=PathPrefix(`/api/orders`)"
+      - "traefik.http.routers.orders.entrypoints=web"
+      - "traefik.http.routers.orders.service=order-lb"
+      - "traefik.http.services.order-lb.loadbalancer.server.port=8080"
+      - "traefik.http.services.order-lb.loadbalancer.healthcheck.path=/actuator/health"
+      - "traefik.http.services.order-lb.loadbalancer.healthcheck.interval=5s"
+
+  delivery-service:
+    build:
+      context: ./delivery-service
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      SERVER_PORT: "8080"
+      ORDER_SERVICE_BASE_URL: http://order-service:8080
+    depends_on:
+      order-service:
+        condition: service_healthy
+    networks:
+      - backend
+      - edge
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8080/actuator/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 35s
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=practice5-edge"
+      - "traefik.http.routers.deliveries.rule=PathPrefix(`/api/deliveries`)"
+      - "traefik.http.routers.deliveries.entrypoints=web"
+      - "traefik.http.routers.deliveries.service=delivery-lb"
+      - "traefik.http.services.delivery-lb.loadbalancer.server.port=8080"
+      - "traefik.http.services.delivery-lb.loadbalancer.healthcheck.path=/actuator/health"
+      - "traefik.http.services.delivery-lb.loadbalancer.healthcheck.interval=5s"
+
+  traefik:
+    image: traefik:v3.7.17
+    restart: unless-stopped
+    command:
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--providers.docker.network=practice5-edge"
+      - "--entrypoints.web.address=:80"
+      - "--api.dashboard=false"
+      - "--log.level=INFO"
+    ports:
+      - "127.0.0.1:${HTTP_PORT:-8088}:80"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    depends_on:
+      order-service:
+        condition: service_healthy
+      delivery-service:
+        condition: service_healthy
+    networks:
+      - edge
+
+volumes:
+  postgres_data:
+
+networks:
+  backend:
+    name: practice5-backend
+    internal: true
+  edge:
+    name: practice5-edge
