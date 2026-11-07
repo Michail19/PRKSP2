@@ -1,0 +1,27 @@
+server:
+  port: 8080
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+            - id: supplier
+              uri: http://supplier-service:8080
+              predicates:
+                - Path=/api/products/**,/api/suppliers/**
+            - id: orders
+              uri: http://order-service:8080
+              predicates:
+                - Path=/api/orders/**
+            - id: deliveries
+              uri: http://delivery-service:8080
+              predicates:
+                - Path=/api/deliveries/**
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics

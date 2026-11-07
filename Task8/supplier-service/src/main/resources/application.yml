@@ -1,0 +1,14 @@
+server:
+  port: 8080
+spring:
+  application:
+    name: supplier-service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/supplier_db
+    username: app
+    password: localpass
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics

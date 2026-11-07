@@ -1,0 +1,13 @@
+CREATE TABLE IF NOT EXISTS suppliers (id BIGINT PRIMARY KEY, name VARCHAR(120) NOT NULL);
+CREATE TABLE IF NOT EXISTS products (id BIGINT PRIMARY KEY, supplier_id BIGINT NOT NULL REFERENCES suppliers(id), name VARCHAR(160) NOT NULL, price_kopecks BIGINT NOT NULL CHECK(price_kopecks>0), stock INT NOT NULL CHECK(stock>=0));
+INSERT INTO suppliers(id,name) VALUES (1,'Товары даркстора — поставщик А'),(2,'Товары даркстора — поставщик Б') ON CONFLICT DO NOTHING;
+INSERT INTO products(id,supplier_id,name,price_kopecks,stock) VALUES (1,1,'Пицца "Маргарита"',59999,102) ON CONFLICT DO NOTHING;
+INSERT INTO products(id,supplier_id,name,price_kopecks,stock) VALUES (2,1,'Салат "Цезарь"',24999,104) ON CONFLICT DO NOTHING;
+INSERT INTO products(id,supplier_id,name,price_kopecks,stock) VALUES (3,1,'Бургер "Гриль"',39999,106) ON CONFLICT DO NOTHING;
+INSERT INTO products(id,supplier_id,name,price_kopecks,stock) VALUES (4,1,'Суп "Минестроне"',19999,108) ON CONFLICT DO NOTHING;
+INSERT INTO products(id,supplier_id,name,price_kopecks,stock) VALUES (5,1,'Десерт "Тирамису"',14999,110) ON CONFLICT DO NOTHING;
+INSERT INTO products(id,supplier_id,name,price_kopecks,stock) VALUES (6,2,'Лазанья "Болоньезе"',49999,112) ON CONFLICT DO NOTHING;
+INSERT INTO products(id,supplier_id,name,price_kopecks,stock) VALUES (7,2,'Крем-суп из шампиньонов',24999,114) ON CONFLICT DO NOTHING;
+INSERT INTO products(id,supplier_id,name,price_kopecks,stock) VALUES (8,2,'Греческий салат',29999,116) ON CONFLICT DO NOTHING;
+INSERT INTO products(id,supplier_id,name,price_kopecks,stock) VALUES (9,2,'Паста "Карбонара"',34999,118) ON CONFLICT DO NOTHING;
+INSERT INTO products(id,supplier_id,name,price_kopecks,stock) VALUES (10,2,'Яблочный пирог',19999,120) ON CONFLICT DO NOTHING;

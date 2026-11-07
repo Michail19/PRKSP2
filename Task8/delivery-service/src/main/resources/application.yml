@@ -1,0 +1,23 @@
+server:
+  port: 8080
+spring:
+  application:
+    name: delivery-service
+  r2dbc:
+    url: r2dbc:postgresql://localhost:5432/delivery_db
+    username: app
+    password: localpass
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: demo
+    password: demo123
+    listener:
+      simple:
+        default-requeue-rejected: true
+        prefetch: 4
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics

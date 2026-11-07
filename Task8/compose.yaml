@@ -1,0 +1,160 @@
+name: pr8-darkstore
+services:
+  traefik:
+    image: traefik:v3.7.17
+    command:
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --entrypoints.web.address=:80
+      - --api.dashboard=true
+      - --api.insecure=true
+    ports:
+      - "127.0.0.1:8088:80"
+      - "127.0.0.1:8089:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    depends_on:
+      api-gateway: { condition: service_healthy }
+    networks: [edge]
+
+  api-gateway:
+    build: { context: ., dockerfile: Dockerfile, args: { MODULE: api-gateway } }
+    environment:
+      JAVA_TOOL_OPTIONS: "-Xms64m -Xmx256m"
+      SPRING_PROFILES_ACTIVE: docker
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=pr8-darkstore-edge
+      - traefik.http.routers.api.rule=PathPrefix(`/`)
+      - traefik.http.routers.api.entrypoints=web
+      - traefik.http.services.api.loadbalancer.server.port=8080
+    depends_on:
+      supplier-service: { condition: service_healthy }
+      order-service: { condition: service_healthy }
+      delivery-service: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://localhost:8080/actuator/health | grep -q UP"]
+      interval: 10s
+      timeout: 5s
+      start_period: 35s
+      retries: 10
+    networks: [edge, backend]
+
+  supplier-service:
+    build: { context: ., dockerfile: Dockerfile, args: { MODULE: supplier-service } }
+    environment:
+      JAVA_TOOL_OPTIONS: "-Xms64m -Xmx256m"
+      SPRING_DATASOURCE_URL: jdbc:postgresql://supplier-db:5432/supplier_db
+      SPRING_DATASOURCE_USERNAME: app
+      SPRING_DATASOURCE_PASSWORD: localpass
+    depends_on:
+      supplier-db: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://localhost:8080/actuator/health | grep -q UP"]
+      interval: 10s
+      timeout: 5s
+      start_period: 35s
+      retries: 10
+    networks: [backend]
+
+  order-service:
+    build: { context: ., dockerfile: Dockerfile, args: { MODULE: order-service } }
+    environment:
+      JAVA_TOOL_OPTIONS: "-Xms64m -Xmx256m"
+      SPRING_DATASOURCE_URL: jdbc:postgresql://order-db:5432/order_db
+      SPRING_DATASOURCE_USERNAME: app
+      SPRING_DATASOURCE_PASSWORD: localpass
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_USERNAME: demo
+      SPRING_RABBITMQ_PASSWORD: demo123
+      APP_SUPPLIER_BASE_URL: http://supplier-service:8080
+    depends_on:
+      order-db: { condition: service_healthy }
+      rabbitmq: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://localhost:8080/actuator/health | grep -q UP"]
+      interval: 10s
+      timeout: 5s
+      start_period: 35s
+      retries: 10
+    networks: [backend]
+
+  delivery-service:
+    build: { context: ., dockerfile: Dockerfile, args: { MODULE: delivery-service } }
+    environment:
+      JAVA_TOOL_OPTIONS: "-Xms64m -Xmx256m"
+      SPRING_R2DBC_URL: r2dbc:postgresql://delivery-db:5432/delivery_db
+      SPRING_R2DBC_USERNAME: app
+      SPRING_R2DBC_PASSWORD: localpass
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_USERNAME: demo
+      SPRING_RABBITMQ_PASSWORD: demo123
+    depends_on:
+      delivery-db: { condition: service_healthy }
+      rabbitmq: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://localhost:8080/actuator/health | grep -q UP"]
+      interval: 10s
+      timeout: 5s
+      start_period: 35s
+      retries: 10
+    networks: [backend]
+
+  supplier-db:
+    image: postgres:16-alpine
+    environment: { POSTGRES_DB: supplier_db, POSTGRES_USER: app, POSTGRES_PASSWORD: localpass }
+    volumes:
+      - supplier_data:/var/lib/postgresql/data
+      - ./sql/supplier.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app -d supplier_db"]
+      interval: 5s
+      retries: 15
+    networks: [backend]
+
+  order-db:
+    image: postgres:16-alpine
+    environment: { POSTGRES_DB: order_db, POSTGRES_USER: app, POSTGRES_PASSWORD: localpass }
+    volumes:
+      - order_data:/var/lib/postgresql/data
+      - ./sql/order.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app -d order_db"]
+      interval: 5s
+      retries: 15
+    networks: [backend]
+
+  delivery-db:
+    image: postgres:16-alpine
+    environment: { POSTGRES_DB: delivery_db, POSTGRES_USER: app, POSTGRES_PASSWORD: localpass }
+    volumes:
+      - delivery_data:/var/lib/postgresql/data
+      - ./sql/delivery.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app -d delivery_db"]
+      interval: 5s
+      retries: 15
+    networks: [backend]
+
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    environment: { RABBITMQ_DEFAULT_USER: demo, RABBITMQ_DEFAULT_PASS: demo123 }
+    ports: ["127.0.0.1:15672:15672"]
+    volumes: ["rabbit_data:/var/lib/rabbitmq"]
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 10s
+      retries: 20
+    networks: [backend]
+
+networks:
+  edge:
+    name: pr8-darkstore-edge
+  backend:
+    internal: true
+volumes:
+  supplier_data: {}
+  order_data: {}
+  delivery_data: {}
+  rabbit_data: {}

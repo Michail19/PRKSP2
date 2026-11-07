@@ -1,0 +1,25 @@
+server:
+  port: 8080
+spring:
+  application:
+    name: order-service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/order_db
+    username: app
+    password: localpass
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: demo
+    password: demo123
+    publisher-confirm-type: simple
+app:
+  supplier:
+    base-url: http://localhost:8082
+  outbox:
+    interval-ms: 1000
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
